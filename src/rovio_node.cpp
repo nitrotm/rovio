@@ -95,6 +95,9 @@ int main(int argc, char** argv){
 
   nh_private.param("filter_config", filter_config, filter_config);
 
+  std::cout << "Root dir: " << rootdir << std::endl;
+  std::cout << "Filter config: " << filter_config << std::endl;
+
   // Filter
   std::shared_ptr<mtFilter> mpFilter(new mtFilter);
   mpFilter->readFromInfo(filter_config);
