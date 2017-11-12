@@ -12,8 +12,6 @@ add_definitions(-DROVIO_NLEVELS=${ROVIO_NLEVELS})
 add_definitions(-DROVIO_PATCHSIZE=${ROVIO_PATCHSIZE})
 add_definitions(-DROVIO_NPOSE=${ROVIO_NPOSE})
 
-add_subdirectory(lightweight_filtering)
-
 ##################### Find, include, and compile library #####################
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 if(0)
@@ -44,19 +42,22 @@ find_package(PkgConfig)
 
 find_package(yaml_cpp_catkin QUIET)
 if(${yaml_cpp_catkin_FOUND})
-  message(STATUS "Found yaml_cpp_catkin, using instead of system library.")
-  set(YamlCpp_LIBRARIES ${yaml_cpp_catkin_LIBRARIES})
-  set(YamlCpp_INCLUDE_DIRS ${yaml_cpp_catkin_INCLUDE_DIRS})
+	message(STATUS "Found yaml_cpp_catkin, using instead of system library.")
+	set(YamlCpp_LIBRARIES ${yaml_cpp_catkin_LIBRARIES})
+	set(YamlCpp_INCLUDE_DIRS ${yaml_cpp_catkin_INCLUDE_DIRS})
 else()
-  message(STATUS "No yaml_cpp_catkin, using yaml-cpp system library instead.")
-  pkg_check_modules(YamlCpp REQUIRED yaml-cpp>=0.5)
+	message(STATUS "No yaml_cpp_catkin, using yaml-cpp system library instead.")
+	pkg_check_modules(YamlCpp REQUIRED yaml-cpp>=0.5)
 endif()
 
+find_package(OpenCV REQUIRED)
+link_directories(${OpenCV_LIBRARY_DIRS})
+
+include_directories(lightweight_filtering/include)
 
 ##################### Install ROS stuff #####################
 find_package(catkin REQUIRED COMPONENTS
-	lightweight_filtering
-  	kindr
+	kindr
 	roscpp
 	roslib
 	cv_bridge
@@ -70,21 +71,20 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 add_service_files(
-  DIRECTORY srv
-  FILES SrvResetToPose.srv
+	DIRECTORY srv
+	FILES SrvResetToPose.srv
 )
 
 generate_messages(DEPENDENCIES
-  std_msgs
-  geometry_msgs
+	std_msgs
+	geometry_msgs
 )
 
 catkin_package(
 	INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
-    LIBRARIES ${PROJECT_NAME}
+	LIBRARIES ${PROJECT_NAME}
 	CATKIN_DEPENDS
-	lightweight_filtering
-  	kindr
+	kindr
 	roscpp
 	roslib
 	cv_bridge
@@ -95,7 +95,7 @@ catkin_package(
 	std_msgs
 	tf
 	rosbag
-  yaml_cpp_catkin
+	yaml_cpp_catkin
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${YamlCpp_INCLUDE_DIRS})
@@ -109,14 +109,14 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} $
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} rovio_generate_messages_cpp)
 
 add_executable(rovio_node src/rovio_node.cpp)
-target_link_libraries(rovio_node ${PROJECT_NAME})
+target_link_libraries(rovio_node ${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
 add_executable(rovio_rosbag_loader src/rovio_rosbag_loader.cpp)
-target_link_libraries(rovio_rosbag_loader ${PROJECT_NAME})
+target_link_libraries(rovio_rosbag_loader ${PROJECT_NAME} ${OpenCV_LIBRARIES})
 add_dependencies(rovio_rosbag_loader ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(feature_tracker_node src/feature_tracker_node.cpp)
-target_link_libraries(feature_tracker_node ${PROJECT_NAME})
+target_link_libraries(feature_tracker_node ${PROJECT_NAME} ${OpenCV_LIBRARIES})
 add_dependencies(feature_tracker_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gtest/")
