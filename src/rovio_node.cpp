@@ -117,6 +117,8 @@ int main(int argc, char** argv){
   rovioNode.makeTest();
 
 #ifdef MAKE_SCENE
+  std::cout << "Starting OpenGL renderer" << std::endl;
+
   // Scene
   std::string mVSFileName = rootdir + "/shaders/shader.vs";
   std::string mFSFileName = rootdir + "/shaders/shader.fs";
