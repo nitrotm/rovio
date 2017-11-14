@@ -205,7 +205,7 @@ class RovioNode{
     gotFirstMessages_ = false;
 
     // Subscribe topics
-    subImu_ = nh_.subscribe("camera/imu/data_raw", 1000, &RovioNode::imuCallback,this);
+    subImu_ = nh_.subscribe("camera/imu/data_diff", 1000, &RovioNode::imuCallback,this);
     subImg0_ = nh_.subscribe("camera/fisheye/image_raw", 1000, &RovioNode::imgCallback0,this);
     subImg1_ = nh_.subscribe("camera/rgb/image_raw", 1000, &RovioNode::imgCallback1,this);
     subGroundtruth_ = nh_.subscribe("pose", 1000, &RovioNode::groundtruthCallback,this);
